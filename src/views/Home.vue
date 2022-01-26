@@ -109,19 +109,20 @@
           this.getNtfs(50)
         }
 
-        if (this.activeNfts.length===3){
+        if (this.activeNfts.length>=2){
 
           let random = Math.floor(Math.random()*4)
-          console.log(random)
+          console.log("rr"+random)
           this.activeNfts.splice(random,1)
         }
 
 
 
         while(this.activeNfts.length<=3){
-          console.log(this.activeNfts.length)
-          console.log(this.nfts.length)
+          console.log("aa"+this.activeNfts.length)
+          console.log("nn"+this.nfts.length)
           const currentNft= this.nfts.shift();
+          console.log(currentNft)
           currentNft.imgUrl=await this.downloadImg(currentNft.previewUrl)
           this.activeNfts.push(currentNft)
 
