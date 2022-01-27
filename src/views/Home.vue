@@ -4,12 +4,12 @@
 <!--  <v-btn @click="getNft">-->
 <!--    click me-->
 <!--  </v-btn>-->
-  <v-container>
-    <v-row v-masonry>
-      <v-col md="3" sm="6" cols="12" v-for="url in activeNfts">
+  <v-container class="containr" align="center">
+    <v-row >
+      <v-col md="3" sm="6" cols="12" v-for="url in activeNfts" >
         <v-hover v-slot="{ hover }">
           <v-card color="#232323" :href="url.permalink" target="_blank" >
-          <v-img :class="blur(hover)" :src="url.imgUrl" @load="$redrawVueMasonry()">
+          <v-img :class="blur(hover)" :src="url.imgUrl" >
 
           </v-img>
             <v-expand-transition>
@@ -85,16 +85,32 @@
             }
 
             console.log(asset.image_preview_url)
+            if (nftObject.previewUrl)
             this.nfts.push(nftObject);
 
           }
 
-
+          this.firstFill()
           console.log(response)
 
         })
 
 
+      },
+      getFilteredNfts(limit){
+        this.getNtfs(limit)
+        let isNull=true;
+        let isBaseball=false;
+        for (let url of this.nfts){
+          if (url.previewUrl) isNull=false;
+
+          if (url.originalUrl && url.originalUrl.toString().includes("crypto-baseball")) isBaseball= true;
+        }
+
+        if  (isNull || isBaseball){
+          this.nfts=[];
+          this.getNtfs(limit)
+        }
       },
       async downloadImg (url){
         const image = await fetch(url);
@@ -106,19 +122,39 @@
         console.log("0000000")
 
         if (this.nfts.length<5){
-          this.getNtfs(50)
+          this.getFilteredNfts(50)
         }
 
         if (this.activeNfts.length>=2){
 
           let random = Math.floor(Math.random()*4)
           console.log("rr"+random)
-          this.activeNfts.splice(random,1)
+
+          const currentNft=await this.nfts.shift();
+          console.log(currentNft)
+          currentNft.imgUrl=await this.downloadImg(currentNft.previewUrl)
+          //this.activeNfts.assign(random,currentNft)
+          this.activeNfts.splice(random,1,currentNft)
         }
 
 
 
-        while(this.activeNfts.length<=3){
+        if (this.activeNfts.length>4){
+          console.log("gretter than 4 "+this.activeNfts.length)
+          this.activeNfts.splice(0,1)
+
+        }
+
+
+        //await this.firstFill();
+
+
+
+
+
+      },
+      async firstFill( ){
+        while(this.activeNfts.length<4){
           console.log("aa"+this.activeNfts.length)
           console.log("nn"+this.nfts.length)
           const currentNft= this.nfts.shift();
@@ -128,12 +164,6 @@
 
 
         }
-
-
-
-
-
-
 
       }
 
@@ -161,7 +191,7 @@
       //'https://api.opensea.io/api/v1/assets?order_by=sale_date&order_direction=desc&offset=0&limit=20'
 
 
-      this.getNtfs(12);
+      this.getFilteredNfts(12);
 
       setInterval(this.main,10000)
 
@@ -182,7 +212,12 @@
   }
 </script>
 <style scoped>
+.containr{
+  align-items: center;
+  bottom: 0;
+  justify-content: center;
 
+}
 .v-card--reveal {
   align-items: end;
   bottom: 0;
