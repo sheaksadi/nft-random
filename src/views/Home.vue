@@ -1,15 +1,15 @@
 <template>
-<div>
+<div >
 
 <!--  <v-btn @click="getNft">-->
 <!--    click me-->
 <!--  </v-btn>-->
-  <v-container class="containr" align="center">
-    <v-row >
+  <v-container align="center">
+    <v-row v-masonry style="height: 100vh">
       <v-col md="3" sm="6" cols="12" v-for="url in activeNfts" >
         <v-hover v-slot="{ hover }">
           <v-card color="#232323" :href="url.permalink" target="_blank" >
-          <v-img :class="blur(hover)" :src="url.imgUrl" >
+          <v-img :class="blur(hover)" :src="url.imgUrl" @load="$redrawVueMasonry()">
 
           </v-img>
             <v-expand-transition>
@@ -51,6 +51,7 @@
       return{
         nfts: [],
         activeNfts:[],
+        numberOfNfts:8,
 
 
 
@@ -121,13 +122,13 @@
       async main(){
         console.log("0000000")
 
-        if (this.nfts.length<5){
+        if (this.nfts.length<this.numberOfNfts+1){
           this.getFilteredNfts(50)
         }
 
-        if (this.activeNfts.length>=2){
+        if (this.activeNfts.length>=this.numberOfNfts-2){
 
-          let random = Math.floor(Math.random()*4)
+          let random = Math.floor(Math.random()*this.numberOfNfts)
           console.log("rr"+random)
 
           const currentNft=await this.nfts.shift();
@@ -139,7 +140,7 @@
 
 
 
-        if (this.activeNfts.length>4){
+        if (this.activeNfts.length>this.numberOfNfts){
           console.log("gretter than 4 "+this.activeNfts.length)
           this.activeNfts.splice(0,1)
 
@@ -154,7 +155,7 @@
 
       },
       async firstFill( ){
-        while(this.activeNfts.length<4){
+        while(this.activeNfts.length<this.numberOfNfts){
           console.log("aa"+this.activeNfts.length)
           console.log("nn"+this.nfts.length)
           const currentNft= this.nfts.shift();
@@ -191,9 +192,9 @@
       //'https://api.opensea.io/api/v1/assets?order_by=sale_date&order_direction=desc&offset=0&limit=20'
 
 
-      this.getFilteredNfts(12);
+      this.getFilteredNfts(18);
 
-      setInterval(this.main,10000)
+      setInterval(this.main,5000)
 
 
 
@@ -212,12 +213,7 @@
   }
 </script>
 <style scoped>
-.containr{
-  align-items: center;
-  bottom: 0;
-  justify-content: center;
 
-}
 .v-card--reveal {
   align-items: end;
   bottom: 0;
