@@ -108,13 +108,12 @@ export default {
 
           if (this.nfts.length===0 && this.firstLaunch) {
             let currentNft = nftObject;
-            currentNft.imgUrl = await this.downloadImg(currentNft.previewUrl)
+            currentNft.imgUrl = currentNft.previewUrl
             this.activeNft = currentNft;
             this.firstLaunch=false;
             console.log("first launch")
           }
-
-          if (nftObject.previewUrl)
+          else if (nftObject.previewUrl)
             this.nfts.push(nftObject);
 
         }
