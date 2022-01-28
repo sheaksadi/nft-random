@@ -18,7 +18,7 @@
             v-if="activeNft"
             v-on:mouseenter="stopCounter"
             v-on:mouseleave="statCounter"
-            class=" img rounded align-center justify-center"
+            class=" rounded align-center justify-center"
 
             max-width="auto"
             :src="activeNft.imgUrl"
@@ -74,6 +74,7 @@ export default {
       loadComplete: true,
       imgHover: false,
       intervalTime:10*1000,
+      firstLaunch:true,
 
 
     }
@@ -105,10 +106,11 @@ export default {
 
           console.log(this.nfts.length)
 
-          if (this.nfts.length===0) {
+          if (this.nfts.length===0 && this.firstLaunch) {
             let currentNft = nftObject;
             currentNft.imgUrl = await this.downloadImg(currentNft.previewUrl)
             this.activeNft = currentNft;
+            this.firstLaunch=false;
             console.log("first launch")
           }
 
