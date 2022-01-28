@@ -23,8 +23,11 @@
                   @click="gotoPage "
               >
               </v-img>
+              <h3 v-if="imgHover" class="textSubTitle">Rotation paused. Click image to check details.</h3>
+
+
             <v-skeleton-loader
-                v-if="loadComplete"
+                v-if="!activeNft.imgUrl"
                 max-width="300"
                 type="image"
                 class= "rounded align-center justify-center"
@@ -59,6 +62,7 @@ export default {
       activeNft: {},
       interval: null,
       loadComplete: true,
+      imgHover:false,
 
 
     }
@@ -71,10 +75,10 @@ export default {
         return "img";
       } else return '';
     },
-    getNtfs(limit) {
+    async getNtfs(limit) {
       let random = Math.floor(Math.random() * 10000);
       console.log(random)
-      axios.get('https://api.opensea.io/api/v1/assets?order_by=sale_count&offset=' + random + '&limit=' + limit).then(response => {
+      axios.get('https://api.opensea.io/api/v1/assets?order_by=sale_count&offset=' + random + '&limit=' + limit).then(async response => {
         let assets = response.data.assets
         let asset;
         this.nfts = [];
@@ -88,9 +92,12 @@ export default {
 
           }
 
-          console.log(asset.image_preview_url)
+
           if (!this.nfts) {
-            this.activeNft = nftObject;
+            let currentNft = nftObject;
+            currentNft.imgUrl = await this.downloadImg(currentNft.previewUrl)
+            this.activeNft = currentNft;
+
           }
 
           if (nftObject.previewUrl)
@@ -111,12 +118,14 @@ export default {
 
     stopCounter() {
       console.log("stop")
+      this.imgHover=true;
       clearInterval(this.interval);
 
     },
 
     statCounter() {
       console.log("start")
+      this.imgHover=false;
       this.interval = setInterval(this.main, 5000)
 
     },
@@ -125,7 +134,6 @@ export default {
     async downloadImg(url) {
       const image = await fetch(url);
       const imageBlob = await image.blob();
-      this.loadComplete = false;
       return URL.createObjectURL(imageBlob);
 
     },
@@ -166,9 +174,11 @@ export default {
 
 
     async start(){
-      this.getNtfs(6);
+
+      await this.getNtfs(6);
 
       this.interval = setInterval(this.main, 5000)
+
 
     }
 
@@ -183,8 +193,11 @@ export default {
   },
   computed: {
     nftDescription() {
-      if (!this.activeNft) return
-      if ( this.activeNft.description.length > 450)
+      if (!this.activeNft.imgUrl){
+        return "loading.......";
+      }
+
+      if (this.activeNft.description && this.activeNft.description.length > 450)
         return this.activeNft.description.slice(0, 450) + "..."
       else return this.activeNft.description;
 
